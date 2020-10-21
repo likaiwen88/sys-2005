@@ -10,3 +10,6 @@ export const login = (username, password) =>
       password
     }
   });
+
+//获取登录日志
+export const getLoginLog = () => axios.get("getloginlog");

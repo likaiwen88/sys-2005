@@ -36,14 +36,6 @@
             <i class="el-icon-menu"></i>
             <span slot="title">导航二</span>
           </el-menu-item>
-          <el-menu-item index="3" disabled>
-            <i class="el-icon-document"></i>
-            <span slot="title">导航三</span>
-          </el-menu-item>
-          <el-menu-item index="4">
-            <i class="el-icon-setting"></i>
-            <span slot="title">导航四</span>
-          </el-menu-item>
         </el-menu>
       </el-aside>
       <el-container>
@@ -51,14 +43,28 @@
         <el-header>
           <el-row type="flex" class="row-bg" justify="space-between">
             <el-col :span="6"
-              ><div class="grid-content bg-purple"></div
-            ></el-col>
+              ><div class="grid-content bg-purple">哈哈</div></el-col
+            >
             <el-col :span="6"
-              ><div class="grid-content bg-purple-light"></div
-            ></el-col>
-            <el-col :span="6"
-              ><div class="grid-content bg-purple"></div
-            ></el-col>
+              ><div class="grid-content bg-purple-light">
+                <h2>第一个管理系统</h2>
+              </div></el-col
+            >
+            <el-col :span="6">
+              <div class="grid-content bg-purple">
+                <el-avatar
+                  shape="circle"
+                  :size="40"
+                  fit="fit"
+                  class="tx"
+                ></el-avatar>
+                &nbsp; &nbsp;
+                <span>欢迎您</span>
+                <b class="nickname">{{ userInfo.nickname }}</b>
+                &nbsp; &nbsp;
+                <span class="quit" @click="quit">退出</span>
+              </div></el-col
+            >
           </el-row>
         </el-header>
         <!-- 主体 -->
@@ -69,6 +75,10 @@
 </template>
 
 <style>
+.quit {
+  cursor: pointer;
+  color: blue;
+}
 .el-menu-vertical-demo:not(.el-menu--collapse) {
   width: 200px;
   min-height: 400px;
@@ -107,14 +117,28 @@ body > .el-container {
 .el-container:nth-child(7) .el-aside {
   line-height: 320px;
 }
+.tx {
+  vertical-align: middle;
+  background: skyblue;
+}
 </style>
 
 <script>
+import { getLoginLog } from "@/api";
+import { mapState } from "vuex";
 export default {
   data() {
     return {
       isCollapse: true
     };
+  },
+  computed: {
+    ...mapState(["userInfo"])
+  },
+  mounted() {
+    getLoginLog().then(res => {
+      console.log(res);
+    });
   },
   methods: {
     handleOpen(key, keyPath) {
@@ -122,6 +146,14 @@ export default {
     },
     handleClose(key, keyPath) {
       console.log(key, keyPath);
+    },
+    quit() {
+      //退出登录
+      //1,清除token和userinfo
+      //2,跳转到登录页
+      localStorage.removeItem("qf2005-token");
+      localStorage.removeItem("qf2005-userInfo");
+      this.$router.push("/login");
     }
   }
 };

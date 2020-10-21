@@ -1,10 +1,10 @@
 <template>
   <div class="login-page">
+    <video id="bg-video" autoplay muted loop>
+      <source src="./../../../bg_video.d2d602a9.mp4" type="video/mp4" />
+    </video>
     <div class="login-container">
-      <video id="bg-video" autoplay muted loop>
-        <source src="./../../../bg_video.d2d602a9.mp4" type="video/mp4" />
-      </video>
-      <h2>千锋管理系统</h2>
+      <h2>第一个管理系统</h2>
       <el-form
         :model="loginForm"
         status-icon
@@ -42,11 +42,12 @@
 //登录逻辑实现
 //1，收集用户输入的username  password传递给后端
 
-//2，登入通过后，将后端返回的token存到本地
-//3,每次请求的时候，携带token
+//2，登入通过后，将后端返回的token存到本地，跳转到主页
+//3,每次请求的时候，携带token到请求头 authorization
 //4,展示token校验正确的数据
 //5，校验不通过，跳转到登入页
 import { login } from "@/api";
+import { mapMutations } from "vuex";
 
 export default {
   data() {
@@ -82,16 +83,41 @@ export default {
     };
   },
   methods: {
+    ...mapMutations(["SET_USERINFO"]),
     submitForm(formName) {
       this.$refs[formName].validate(valid => {
         if (valid) {
+          //打开登入加载动画
+          const loading = this.$loading({
+            lock: true,
+            text: "正在登录...",
+            spinner: "el-icon-loading",
+            background: "rgba(0, 0, 0, 0.7)"
+          });
+
           //代表本地校验通过
           //发送登入请求
           login(this.loginForm.username, this.loginForm.password)
             .then(res => {
-              console.log(res);
+              //服务器响应，关闭loading动画
+              loading.close();
+
               if (res.data.state) {
-                localStorage.setItem("qf-2005");
+                this.$message.success("登录成功");
+                //用户名密码正确
+                localStorage.setItem("qf2005-token", res.data.token);
+                localStorage.setItem(
+                  "qf2005-userInfo",
+                  JSON.stringify(res.data.userInfo)
+                );
+                //更改vuex中state['userinfo']的值
+                this.SET_USERINFO(res.data.userInfo);
+
+                //跳转到主页
+                this.$router.push("/");
+              } else {
+                //用户名或者密码错误
+                this.$message.error("用户名密码错误");
               }
             })
             .catch(err => {
@@ -124,8 +150,6 @@ h2 {
   padding-top: 50px;
   padding-bottom: 80px;
   text-align: center;
-  /* margin:100px 0 0 600px;
-    padding: 100px 0 100px 0; */
 }
 .login-container {
   padding-top: 80px;
@@ -133,7 +157,8 @@ h2 {
   position: relative;
   top: 80px;
   left: 580px;
-  background: royalblue;
+  /* background: royalblue; */
+  background-color: rgba(0, 0, 0, 0.2);
   border-radius: 10px;
 }
 #bg-video {
